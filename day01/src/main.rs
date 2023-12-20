@@ -1,13 +1,38 @@
-use std::fs::read_to_string;
+const NUMBERS: [&str; 9] = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
-fn extract_numbers(s: &str) -> u32 {
-    let buf: Vec<char> = s
+fn parse(line: &str) -> u32 {
+    let indices: Vec<_> = NUMBERS
+        .iter()
+        .enumerate()
+        .fold(vec![], |mut acc, num| {
+            acc.extend(line
+                .match_indices(num.1)
+                .map(|(i, _)| (i, num.0+1))
+                .collect::<Vec<_>>()
+            );
+            acc
+        });
+
+    let parsed: Vec<_> = line
         .chars()
-        .filter(|ch| ch.to_digit(10).is_some())
+        .enumerate()
+        .filter_map(|(i, k)| {
+            if k.is_digit(10) {
+                return Some(k.to_string());
+            }
+            
+            let index = indices.iter().find(|x| x.0 == i);
+
+            if let Some((_, num)) = index {
+                return Some(num.to_string());
+            }
+
+            return None;
+        })
         .collect();
 
-    let first = *buf.first().unwrap_or(&'0');
-    let second = *buf.last().unwrap_or(&first);
+    let first = parsed.first().unwrap();
+    let second = parsed.last().unwrap_or(&first);
 
     format!("{}{}", first, second)
         .parse::<u32>()
@@ -15,11 +40,10 @@ fn extract_numbers(s: &str) -> u32 {
 }
 
 fn main() {
-    let source = read_to_string("input.txt").unwrap();
+    let source = std::fs::read_to_string("input.txt").unwrap();
     let num: u32 = source
-        .as_str()
         .lines()
-        .map(extract_numbers)
+        .map(parse)
         .sum();
 
     println!("{:?}", num);
