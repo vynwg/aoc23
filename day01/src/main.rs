@@ -34,9 +34,7 @@ fn parse(line: &str) -> u32 {
     let first = parsed.first().unwrap();
     let second = parsed.last().unwrap_or(&first);
 
-    format!("{}{}", first, second)
-        .parse::<u32>()
-        .unwrap()
+    format!("{first}{second}").parse::<u32>().unwrap()
 }
 
 fn main() {
@@ -46,5 +44,5 @@ fn main() {
         .map(parse)
         .sum();
 
-    println!("{:?}", num);
+    println!("Result: {:?}", num);
 }
